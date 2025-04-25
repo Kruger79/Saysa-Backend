@@ -1,11 +1,8 @@
-// Importa Express y crea el router
 const express = require('express');
 const router = express.Router();
+const { obtenerPedidosPorCedula } = require('../../controllers/pedidos.controller');
 
-// Importa el controlador que actualizará el estado
-const { actualizarEstadoPedido } = require('../../controllers/pedidos.controllers');
-
-// Ruta PUT para actualizar el estado de un pedido (por ID)
-router.put('/:id', actualizarEstadoPedido);
+// GET /api/v1/pedidos/:cedula
+router.get('/:cedula', obtenerPedidosPorCedula);
 
 module.exports = router;
