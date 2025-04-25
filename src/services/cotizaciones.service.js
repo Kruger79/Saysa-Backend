@@ -1,52 +1,48 @@
-// Importa la conexión a la base de datos
-const db = require('../database/config');
-const sql = require('mssql');
+// src/services/cotizaciones.service.js
 
-// Servicio para crear una cotización con su detalle (carrito de compra)
-const crearCotizacionConDetalleService = async (data) => {
-  const { cedula, productos } = data;
+const { poolPromise, sql } = require('../database/config');
 
+// Servicio para crear una cotización con sus productos
+const crearCotizacionConDetalleService = async (cedula, productos) => {
   try {
-    // Conexión a la base de datos
-    const pool = await db.getConnection();
+    const pool = await poolPromise;
 
-    // Obtener el ID del usuario con base en la cédula
-    const resultUsuario = await pool
+    // Obtener el ID del usuario a partir de la cédula
+    const resultCliente = await pool
       .request()
-      .input('cedula', sql.NVarChar, cedula)
-      .query('SELECT IdUsuario FROM Clientes WHERE Cedula = @cedula');
+      .input('Cedula', sql.NVarChar, cedula)
+      .query('SELECT IdUsuario FROM Clientes WHERE Cedula = @Cedula');
 
-    if (resultUsuario.recordset.length === 0) {
-      throw new Error('No se encontró un usuario con esa cédula');
+    if (resultCliente.recordset.length === 0) {
+      throw new Error('Cliente no encontrado');
     }
 
-    const idUsuario = resultUsuario.recordset[0].IdUsuario;
+    const idUsuario = resultCliente.recordset[0].IdUsuario;
 
-    // Insertar en Cotizaciones
+    // Insertar cotización
     const resultCotizacion = await pool
       .request()
-      .input('idUsuario', sql.Int, idUsuario)
+      .input('IdUsuario', sql.Int, idUsuario)
+      .input('Estado', sql.NVarChar, 'Pendiente')
       .query(`
         INSERT INTO Cotizaciones (IdUsuario, Estado, FechaSolicitud)
         OUTPUT INSERTED.IdCotizacion
-        VALUES (@idUsuario, 'Pendiente', GETDATE());
+        VALUES (@IdUsuario, @Estado, GETDATE())
       `);
 
     const idCotizacion = resultCotizacion.recordset[0].IdCotizacion;
 
-    // Insertar productos en DetalleCotizacion
+    // Insertar productos del detalle
     for (const producto of productos) {
       await pool
         .request()
-        .input('idCotizacion', sql.Int, idCotizacion)
-        .input('idProducto', sql.Int, producto.idProducto)
-        .input('cantidad', sql.Int, producto.cantidad)
-        .input('precioUnitario', sql.Money, producto.precioUnitario)
-        .input('tiempoEntrega', sql.NVarChar, producto.tiempoEntrega || '')
-        .input('garantia', sql.NVarChar, producto.garantia || '')
+        .input('IdCotizacion', sql.Int, idCotizacion)
+        .input('IdProducto', sql.Int, producto.idProducto)
+        .input('Cantidad', sql.Int, producto.cantidad)
+        .input('PrecioUnitario', sql.Money, producto.precioUnitario)
         .query(`
-          INSERT INTO DetalleCotizacion (IdCotizacion, IdProducto, Cantidad, PrecioUnitario, TiempoEntrega, Garantia)
-          VALUES (@idCotizacion, @idProducto, @cantidad, @precioUnitario, @tiempoEntrega, @garantia);
+          INSERT INTO DetalleCotizacion (IdCotizacion, IdProducto, Cantidad, PrecioUnitario)
+          VALUES (@IdCotizacion, @IdProducto, @Cantidad, @PrecioUnitario)
         `);
     }
 
@@ -54,8 +50,9 @@ const crearCotizacionConDetalleService = async (data) => {
       mensaje: 'Cotización creada con éxito',
       idCotizacion
     };
+
   } catch (error) {
-    console.error('❌ Error en crearCotizacionConDetalle:', error);
+    console.error('❌ Error en crearCotizacionConDetalleService:', error);
     throw error;
   }
 };
@@ -63,27 +60,27 @@ const crearCotizacionConDetalleService = async (data) => {
 // Servicio para obtener cotizaciones por cédula
 const obtenerCotizacionesService = async (cedula) => {
   try {
-    const pool = await db.getConnection();
+    const pool = await poolPromise;
 
-    // Buscar cotizaciones que pertenezcan al usuario con esa cédula
     const result = await pool
       .request()
-      .input('cedula', sql.NVarChar, cedula)
+      .input('Cedula', sql.NVarChar, cedula)
       .query(`
-        SELECT C.IdCotizacion, C.Estado, C.FechaSolicitud
-        FROM Cotizaciones C
-        JOIN Clientes CL ON C.IdUsuario = CL.IdUsuario
-        WHERE CL.Cedula = @cedula
-        ORDER BY C.FechaSolicitud DESC;
+        SELECT c.IdCotizacion, c.Estado, c.FechaSolicitud
+        FROM Cotizaciones c
+        INNER JOIN Clientes cl ON c.IdUsuario = cl.IdUsuario
+        WHERE cl.Cedula = @Cedula
       `);
 
     return result.recordset;
+
   } catch (error) {
     console.error('❌ Error en obtenerCotizacionesService:', error);
     throw error;
   }
 };
 
+// Exportar funciones correctamente
 module.exports = {
   crearCotizacionConDetalleService,
   obtenerCotizacionesService
