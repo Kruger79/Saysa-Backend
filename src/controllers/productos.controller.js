@@ -11,3 +11,4 @@ const obtenerProductos = async (req, res) => {
 };
 
 module.exports = { obtenerProductos };
+
