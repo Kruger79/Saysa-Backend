@@ -1,10 +1,12 @@
 const express = require('express'); // Importa Express
 const app = express();              // Crea la aplicación
+const cors = require('cors');
+
 require('dotenv').config();         // Carga las variables desde el archivo .env
 
 // Middlewares
 app.use(express.json()); // Permite recibir y procesar JSON en las solicitudes
-
+app.use(cors());// ✅ Habilitar CORS
 // ======================
 // RUTAS
 // ======================
@@ -38,4 +40,5 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Server escuchando en el puerto ${PORT}`);
 });
+
 
