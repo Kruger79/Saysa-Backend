@@ -1,21 +1,17 @@
-// Importa el servicio que se comunica con la base de datos
-const { actualizarEstadoEntrega } = require('../services/pedidos.service');
+const { obtenerPedidosPorCedulaService } = require('../services/pedidos.service');
 
-// Función que maneja la solicitud para actualizar estado
-const actualizarEstadoPedido = async (req, res) => {
+const obtenerPedidosPorCedula = async (req, res) => {
+  const cedula = req.params.cedula;
+
   try {
-    const { id } = req.params;              // Extrae el ID de la URL
-    const { estadoEntrega } = req.body;     // Extrae el nuevo estado del body
-
-    // Llama al servicio que hace el cambio en la base de datos
-    await actualizarEstadoEntrega(id, estadoEntrega);
-
-    // Respuesta de éxito
-    res.status(200).json({ mensaje: 'Estado del pedido actualizado correctamente' });
+    const pedidos = await obtenerPedidosPorCedulaService(cedula);
+    res.json(pedidos);
   } catch (error) {
-    console.error('❌ Error al actualizar estado de pedido:', error);
-    res.status(500).json({ error: error.message || 'Error al actualizar estado de pedido' });
+    console.error('❌ Error al obtener pedidos por cédula:', error);
+    res.status(500).json({ error: 'Error al obtener pedidos por cédula' });
   }
 };
 
-module.exports = { actualizarEstadoPedido };
+module.exports = {
+  obtenerPedidosPorCedula
+};
