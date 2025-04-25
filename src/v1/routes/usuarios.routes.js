@@ -4,5 +4,6 @@ const usuariosController = require('../../controllers/usuarios.controller'); // 
 
 // Ruta POST para registrar usuario
 router.post('/', usuariosController.registrarUsuario);
+router.post('/login', usuariosController.loginUsuario);
 
-module.exports = router; // Exporta el router para usarlo en index.js
+module.exports = router;

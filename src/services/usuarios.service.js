@@ -1,4 +1,5 @@
 const { sql, poolPromise } = require('../database/config');
+const bcrypt = require('bcrypt');
 
 // Servicio para registrar un usuario nuevo
 const registrarUsuarioService = async (usuarioData) => {
@@ -27,12 +28,16 @@ const registrarUsuarioService = async (usuarioData) => {
       throw new Error('El correo ya está registrado');
     }
 
+    // 🔐 Hashear la contraseña
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(contrasena, saltRounds);
+
     await pool
       .request()
       .input('Nombre', sql.NVarChar, nombre)
       .input('Correo', sql.NVarChar, correo)
       .input('Telefono', sql.NVarChar, telefono)
-      .input('Contrasena', sql.NVarChar, contrasena)
+      .input('Contrasena', sql.NVarChar, hashedPassword)
       .input('Rol', sql.NVarChar, 'cliente')
       .input('FechaRegistro', sql.DateTime, new Date())
       .input('Cedula', sql.NVarChar, cedula)
@@ -48,6 +53,39 @@ const registrarUsuarioService = async (usuarioData) => {
   }
 };
 
+// Servicio para verificar login de usuario
+const loginUsuarioService = async (correo, contrasena) => {
+  try {
+    const pool = await poolPromise;
+
+    const resultado = await pool
+      .request()
+      .input('Correo', sql.NVarChar, correo)
+      .query('SELECT * FROM Clientes WHERE Correo = @Correo');
+
+    const usuario = resultado.recordset[0];
+
+    if (!usuario) {
+      throw new Error('Correo no registrado');
+    }
+
+    const contraseñaValida = await bcrypt.compare(contrasena, usuario.Contrasena);
+
+    if (!contraseñaValida) {
+      throw new Error('Contraseña incorrecta');
+    }
+
+    // No retornar contraseña
+    delete usuario.Contrasena;
+
+    return usuario;
+  } catch (error) {
+    console.error('❌ Error en loginUsuarioService:', error);
+    throw error;
+  }
+};
+
 module.exports = {
-  registrarUsuarioService
+  registrarUsuarioService,
+  loginUsuarioService
 };

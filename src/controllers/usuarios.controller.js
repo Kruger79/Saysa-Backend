@@ -1,4 +1,4 @@
-const { registrarUsuarioService } = require('../services/usuarios.service');
+const { registrarUsuarioService, loginUsuarioService } = require('../services/usuarios.service');
 
 // Controlador para registrar usuario
 const registrarUsuario = async (req, res) => {
@@ -14,4 +14,20 @@ const registrarUsuario = async (req, res) => {
   }
 };
 
-module.exports = { registrarUsuario };
+// Controlador para login
+const loginUsuario = async (req, res) => {
+  try {
+    const { correo, contrasena } = req.body;
+
+    const usuario = await loginUsuarioService(correo, contrasena);
+
+    res.status(200).json(usuario);
+  } catch (error) {
+    res.status(401).json({ error: error.message });
+  }
+};
+
+module.exports = { 
+  registrarUsuario,
+  loginUsuario
+ };
