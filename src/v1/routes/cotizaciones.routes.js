@@ -1,16 +1,15 @@
+// src/v1/routes/cotizaciones.routes.js
 const express = require('express');
 const router = express.Router();
-
-// Importa los controladores para manejar las solicitudes
 const {
   crearCotizacionConDetalle,
   obtenerCotizacionesPorCedula
 } = require('../../controllers/cotizaciones.controller');
 
-// Ruta POST: Crear una nueva cotización con su detalle (carrito)
+// Crear cotización con detalle
 router.post('/', crearCotizacionConDetalle);
 
-// Ruta GET: Obtener las cotizaciones hechas por un cliente usando la cédula
-router.get('/:cedula', obtenerCotizacionesPorCedula);
+// Obtener cotizaciones por cédula
+router.get('/:cedula', obtenerCotizacionesPorCedula); // ← Aquí debe estar sin paréntesis
 
 module.exports = router;
