@@ -54,19 +54,22 @@ const registrarUsuarioService = async (usuarioData) => {
 };
 
 // Servicio para verificar login de usuario
-const loginUsuarioService = async (correo, contrasena) => {
+const loginUsuarioService = async (correoOCedula, contrasena) => {
   try {
     const pool = await poolPromise;
 
     const resultado = await pool
       .request()
-      .input('Correo', sql.NVarChar, correo)
-      .query('SELECT * FROM Clientes WHERE Correo = @Correo');
+      .input('Identificador', sql.NVarChar, correoOCedula)
+      .query(`
+        SELECT * FROM Clientes
+        WHERE Correo = @Identificador OR Cedula = @Identificador
+      `);
 
     const usuario = resultado.recordset[0];
 
     if (!usuario) {
-      throw new Error('Correo no registrado');
+      throw new Error('Usuario no encontrado');
     }
 
     const contraseñaValida = await bcrypt.compare(contrasena, usuario.Contrasena);
@@ -75,9 +78,7 @@ const loginUsuarioService = async (correo, contrasena) => {
       throw new Error('Contraseña incorrecta');
     }
 
-    // No retornar contraseña
     delete usuario.Contrasena;
-
     return usuario;
   } catch (error) {
     console.error('❌ Error en loginUsuarioService:', error);

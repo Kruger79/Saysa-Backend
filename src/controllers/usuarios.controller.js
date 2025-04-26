@@ -19,7 +19,7 @@ const loginUsuario = async (req, res) => {
   try {
     const { correo, contrasena } = req.body;
 
-    const usuario = await loginUsuarioService(correo, contrasena);
+    const usuario = await loginUsuarioService(correo, contrasena); // 👈 aquí ya puede ser correo o cédula
 
     res.status(200).json(usuario);
   } catch (error) {
