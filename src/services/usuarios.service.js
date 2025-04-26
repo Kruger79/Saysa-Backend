@@ -86,7 +86,25 @@ const loginUsuarioService = async (correoOCedula, contrasena) => {
   }
 };
 
+// Servicio para actualizar teléfono
+const actualizarTelefonoService = async (cedula, telefono) => {
+  try {
+    const pool = await poolPromise;
+
+    await pool
+      .request()
+      .input('Cedula', sql.NVarChar, cedula)
+      .input('Telefono', sql.NVarChar, telefono)
+      .query('UPDATE Clientes SET Telefono = @Telefono WHERE Cedula = @Cedula');
+    
+  } catch (error) {
+    console.error('❌ Error en actualizarTelefonoService:', error);
+    throw error;
+  }
+};
+
 module.exports = {
   registrarUsuarioService,
-  loginUsuarioService
+  loginUsuarioService,
+  actualizarTelefonoService
 };

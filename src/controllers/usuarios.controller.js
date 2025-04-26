@@ -1,4 +1,4 @@
-const { registrarUsuarioService, loginUsuarioService } = require('../services/usuarios.service');
+const { registrarUsuarioService, loginUsuarioService, actualizarTelefonoService } = require('../services/usuarios.service');
 
 // Controlador para registrar usuario
 const registrarUsuario = async (req, res) => {
@@ -19,7 +19,7 @@ const loginUsuario = async (req, res) => {
   try {
     const { correo, contrasena } = req.body;
 
-    const usuario = await loginUsuarioService(correo, contrasena); // 👈 aquí ya puede ser correo o cédula
+    const usuario = await loginUsuarioService(correo, contrasena);
 
     res.status(200).json(usuario);
   } catch (error) {
@@ -27,7 +27,23 @@ const loginUsuario = async (req, res) => {
   }
 };
 
+// Controlador para actualizar teléfono
+const actualizarTelefono = async (req, res) => {
+  try {
+    const { cedula } = req.params;
+    const { telefono } = req.body;
+
+    await actualizarTelefonoService(cedula, telefono);
+
+    res.status(200).json({ mensaje: 'Teléfono actualizado exitosamente' });
+  } catch (error) {
+    console.error('❌ Error al actualizar teléfono:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = { 
   registrarUsuario,
-  loginUsuario
+  loginUsuario,
+  actualizarTelefono
  };
