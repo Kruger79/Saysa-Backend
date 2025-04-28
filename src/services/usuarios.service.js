@@ -53,6 +53,18 @@ const registrarUsuarioService = async (usuarioData) => {
   }
 };
 
+// Servicio para obtener todos los usuarios
+const obtenerUsuariosService = async () => {
+  try {
+    const pool = await poolPromise;
+    const resultado = await pool.request().query('SELECT IdUsuario, Nombre, Correo, Telefono, Rol, Cedula FROM Clientes');
+    return resultado.recordset;
+  } catch (error) {
+    console.error('❌ Error en obtenerUsuariosService:', error);
+    throw error;
+  }
+};
+
 // Servicio para verificar login de usuario
 const loginUsuarioService = async (correoOCedula, contrasena) => {
   try {
@@ -86,6 +98,25 @@ const loginUsuarioService = async (correoOCedula, contrasena) => {
   }
 };
 
+// Servicio para actualizar solo el rol de un usuario basado en la Cédula
+const actualizarRolUsuarioService = async (cedula, rol) => {
+  try {
+    const pool = await poolPromise;
+    const resultado = await pool
+      .request()
+      .input('Cedula', sql.NVarChar, cedula)
+      .input('Rol', sql.NVarChar, rol)
+      .query('UPDATE Clientes SET Rol = @Rol WHERE Cedula = @Cedula');
+
+    if (resultado.rowsAffected[0] === 0) {
+      throw new Error('No se encontró un usuario con esa cédula.');
+    }
+  } catch (error) {
+    console.error('❌ Error en actualizarRolUsuarioService:', error);
+    throw error;
+  }
+};
+
 // Servicio para actualizar teléfono
 const actualizarTelefonoService = async (cedula, telefono) => {
   try {
@@ -106,5 +137,7 @@ const actualizarTelefonoService = async (cedula, telefono) => {
 module.exports = {
   registrarUsuarioService,
   loginUsuarioService,
-  actualizarTelefonoService
+  actualizarTelefonoService,
+  obtenerUsuariosService,
+  actualizarRolUsuarioService
 };

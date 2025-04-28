@@ -8,4 +8,10 @@ router.post('/login', usuariosController.loginUsuario);
 // Nuevo endpoint para actualizar teléfono
 router.put('/:cedula', usuariosController.actualizarTelefono);
 
+// Obtener usuarios
+router.get('/', usuariosController.obtenerUsuarios);
+
+// Actualizar rol
+router.put('/:cedula/rol', usuariosController.actualizarRolUsuario);
+
 module.exports = router;

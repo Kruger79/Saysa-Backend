@@ -1,4 +1,4 @@
-const { registrarUsuarioService, loginUsuarioService, actualizarTelefonoService } = require('../services/usuarios.service');
+const { registrarUsuarioService, loginUsuarioService, actualizarTelefonoService, obtenerUsuariosService, actualizarRolUsuarioService } = require('../services/usuarios.service');
 
 // Controlador para registrar usuario
 const registrarUsuario = async (req, res) => {
@@ -27,6 +27,17 @@ const loginUsuario = async (req, res) => {
   }
 };
 
+// Controlador para obtener usuarios
+const obtenerUsuarios = async (req, res) => {
+  try {
+    const usuarios = await obtenerUsuariosService();
+    res.status(200).json(usuarios);
+  } catch (error) {
+    console.error('❌ Error al obtener usuarios:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 // Controlador para actualizar teléfono
 const actualizarTelefono = async (req, res) => {
   try {
@@ -42,8 +53,23 @@ const actualizarTelefono = async (req, res) => {
   }
 };
 
+// Controlador para actualizar solo el rol
+const actualizarRolUsuario = async (req, res) => {
+  try {
+    const { cedula } = req.params;
+    const { rol } = req.body;
+    await actualizarRolUsuarioService(cedula, rol);
+    res.status(200).json({ mensaje: 'Rol actualizado exitosamente' });
+  } catch (error) {
+    console.error('❌ Error al actualizar rol:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = { 
   registrarUsuario,
   loginUsuario,
-  actualizarTelefono
+  actualizarTelefono,
+  obtenerUsuarios,
+  actualizarRolUsuario
  };
