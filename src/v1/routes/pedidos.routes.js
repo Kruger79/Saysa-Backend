@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { obtenerPedidosPorCedula } = require('../../controllers/pedidos.controllers');
+const { guardarPedido, obtenerPedidosPorCedula } = require('../../controllers/pedidos.controllers');
 
-// GET /api/v1/pedidos/:cedula
+router.post('/', guardarPedido);
 router.get('/:cedula', obtenerPedidosPorCedula);
 
 module.exports = router;

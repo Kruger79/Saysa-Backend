@@ -1,6 +1,3 @@
-// src/controllers/cotizaciones.controller.js
-
-// Importamos los servicios que necesitamos
 const {
   crearCotizacionConDetalleService,
   obtenerCotizacionesService
@@ -10,8 +7,13 @@ const {
 const crearCotizacionConDetalle = async (req, res) => {
   try {
     const { cedula, productos } = req.body;
+
+    if (!cedula || !productos || !Array.isArray(productos)) {
+      return res.status(400).json({ error: 'Datos inválidos para la cotización' });
+    }
+
     const resultado = await crearCotizacionConDetalleService(cedula, productos);
-    res.status(201).json(resultado);
+    res.status(201).json({ mensaje: 'Cotización creada exitosamente', resultado });
   } catch (error) {
     console.error('❌ Error al crear cotización:', error);
     res.status(500).json({ error: 'Error al crear cotización' });
@@ -22,6 +24,10 @@ const crearCotizacionConDetalle = async (req, res) => {
 const obtenerCotizacionesPorCedula = async (req, res) => {
   try {
     const { cedula } = req.params;
+    if (!cedula) {
+      return res.status(400).json({ error: 'Cédula no proporcionada' });
+    }
+
     const cotizaciones = await obtenerCotizacionesService(cedula);
     res.status(200).json(cotizaciones);
   } catch (error) {
@@ -30,7 +36,6 @@ const obtenerCotizacionesPorCedula = async (req, res) => {
   }
 };
 
-// Exportamos los controladores
 module.exports = {
   crearCotizacionConDetalle,
   obtenerCotizacionesPorCedula

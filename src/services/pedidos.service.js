@@ -1,28 +1,61 @@
-const { sql, poolPromise } = require('../database/config');
+// src/services/pedidos.service.js
+const { poolPromise } = require('../database/config');
 
-// Servicio: obtener pedidos por cédula
-const obtenerPedidosPorCedulaService = async (cedula) => {
+const guardarPedidoService = async (cedula, productos) => {
+  const pool = await poolPromise;
+  const transaction = pool.transaction();
+
   try {
-    const pool = await poolPromise;
-    const result = await pool
-      .request()
-      .input('Cedula', sql.NVarChar, cedula)
+    await transaction.begin();
+
+    // Insertar en tabla Pedidos
+    const pedidoResult = await transaction.request()
+      .input('Cedula', cedula)
       .query(`
-        SELECT cl.Cedula, p.Nombre AS NombreProducto, dc.Cantidad, dc.PrecioUnitario
-        FROM Cotizaciones c
-        INNER JOIN DetalleCotizacion dc ON c.IdCotizacion = dc.IdCotizacion
-        INNER JOIN Productos p ON dc.IdProducto = p.IdProducto
-        INNER JOIN Clientes cl ON c.IdUsuario = cl.IdUsuario
-        WHERE cl.Cedula = @Cedula
+        INSERT INTO Pedidos (Cedula, FechaPedido)
+        OUTPUT INSERTED.IdPedido
+        VALUES (@Cedula, GETDATE())
       `);
 
-    return result.recordset;
+    const pedidoId = pedidoResult.recordset[0].IdPedido;
+
+    // Insertar detalles del pedido
+    for (const producto of productos) {
+      await transaction.request()
+        .input('IdPedido', pedidoId)
+        .input('IdProducto', producto.idProducto)
+        .input('Cantidad', producto.cantidad || 1)
+        .query(`
+          INSERT INTO DetallePedido (IdPedido, IdProducto, Cantidad)
+          VALUES (@IdPedido, @IdProducto, @Cantidad)
+        `);
+    }
+
+    await transaction.commit();
   } catch (error) {
-    console.error('❌ Error en obtenerPedidosPorCedulaService:', error);
+    await transaction.rollback();
     throw error;
   }
 };
 
+const obtenerPedidosPorCedulaService = async (cedula) => {
+  const pool = await poolPromise;
+
+  const result = await pool.request()
+    .input('Cedula', cedula)
+    .query(`
+      SELECT p.IdPedido, p.FechaPedido, dp.Cantidad, pr.Nombre, pr.Precio, pr.ImagenUrl
+      FROM Pedidos p
+      INNER JOIN DetallePedido dp ON p.IdPedido = dp.IdPedido
+      INNER JOIN Productos pr ON dp.IdProducto = pr.IdProducto
+      WHERE p.Cedula = @Cedula
+      ORDER BY p.FechaPedido DESC
+    `);
+
+  return result.recordset;
+};
+
 module.exports = {
-  obtenerPedidosPorCedulaService
+  guardarPedidoService,
+  obtenerPedidosPorCedulaService,
 };
