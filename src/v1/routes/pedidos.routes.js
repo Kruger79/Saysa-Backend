@@ -1,8 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const { guardarPedido, obtenerPedidosPorCedula } = require('../../controllers/pedidos.controllers');
+const pedidosController = require('../../controllers/pedidos.controllers');
 
-router.post('/', guardarPedido);
-router.get('/:cedula', obtenerPedidosPorCedula);
+// GET todos los pedidos (para admin dashboard)
+router.get('/', pedidosController.getPedidos);
+
+// GET pedidos por cédula (ya existente)
+router.get('/:cedula', pedidosController.getPedidosPorCedula);
 
 module.exports = router;
