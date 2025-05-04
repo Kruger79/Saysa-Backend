@@ -7,7 +7,13 @@ const obtenerPedidosPorCedula = async (cedula) => {
       .request()
       .input('Cedula', cedula)
       .query(`
-        SELECT p.IdPedido, p.FechaPedido, d.Cantidad, pr.Nombre, d.Precio, pr.ImagenUrl
+        SELECT 
+          p.IdPedido, 
+          p.FechaPedido, 
+          d.Cantidad, 
+          pr.Nombre, 
+          pr.Precio, 
+          pr.ImagenUrl
         FROM Pedidos p
         INNER JOIN DetallePedido d ON p.IdPedido = d.IdPedido
         INNER JOIN Productos pr ON d.IdProducto = pr.IdProducto
@@ -38,9 +44,6 @@ const obtenerTodosLosPedidos = async () => {
     throw error;
   }
 };
-
-
-
 
 module.exports = {
   obtenerPedidosPorCedula,
