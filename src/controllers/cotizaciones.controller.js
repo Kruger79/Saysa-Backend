@@ -1,42 +1,47 @@
 const {
-  crearCotizacionConDetalleService,
-  obtenerCotizacionesService
+  crearCotizacion,
+  obtenerCotizacionesPorCedula
 } = require('../services/cotizaciones.service');
 
-// Controlador para crear una cotización con detalle
-const crearCotizacionConDetalle = async (req, res) => {
+// Crear cotización (y guardar pedido automáticamente)
+const crearCotizacionHandler = async (req, res) => {
   try {
     const { cedula, productos } = req.body;
 
-    if (!cedula || !productos || !Array.isArray(productos)) {
-      return res.status(400).json({ error: 'Datos inválidos para la cotización' });
+    if (!cedula || !productos || productos.length === 0) {
+      return res.status(400).json({ mensaje: 'Datos incompletos para crear cotización' });
     }
 
-    const resultado = await crearCotizacionConDetalleService(cedula, productos);
-    res.status(201).json({ mensaje: 'Cotización creada exitosamente', resultado });
+    const resultado = await crearCotizacion(cedula, productos);
+
+    res.status(201).json({
+      mensaje: resultado.mensaje,
+      idCotizacion: resultado.idCotizacion
+    });
   } catch (error) {
-    console.error('❌ Error al crear cotización:', error);
-    res.status(500).json({ error: 'Error al crear cotización' });
+    console.error("❌ Error al crear cotización:", error);
+    res.status(500).json({ mensaje: 'Error al crear la cotización', error });
   }
 };
 
-// Controlador para obtener cotizaciones por cédula
-const obtenerCotizacionesPorCedula = async (req, res) => {
+// Obtener cotizaciones por cédula
+const obtenerCotizacionesPorCedulaHandler = async (req, res) => {
   try {
-    const { cedula } = req.params;
+    const cedula = req.params.cedula;
+
     if (!cedula) {
-      return res.status(400).json({ error: 'Cédula no proporcionada' });
+      return res.status(400).json({ mensaje: 'Cédula requerida' });
     }
 
-    const cotizaciones = await obtenerCotizacionesService(cedula);
-    res.status(200).json(cotizaciones);
+    const cotizaciones = await obtenerCotizacionesPorCedula(cedula);
+    res.json(cotizaciones);
   } catch (error) {
-    console.error('❌ Error al obtener cotizaciones:', error);
-    res.status(500).json({ error: 'Error al obtener cotizaciones' });
+    console.error("❌ Error al obtener cotizaciones:", error);
+    res.status(500).json({ mensaje: "Error al obtener cotizaciones", error });
   }
 };
 
 module.exports = {
-  crearCotizacionConDetalle,
-  obtenerCotizacionesPorCedula
+  crearCotizacionHandler,
+  obtenerCotizacionesPorCedulaHandler
 };
