@@ -1,84 +1,113 @@
-// src/services/cotizaciones.service.js
-const { poolPromise, sql } = require("../database/config");
+const { poolPromise } = require('../database/config');
 
-const crearCotizacionConDetalleService = async (cedula, productos) => {
+const crearCotizacion = async (cedula, productos) => {
   const pool = await poolPromise;
-  const transaction = new sql.Transaction(pool);
+  const transaction = pool.transaction();
 
   try {
     await transaction.begin();
 
-    const request = new sql.Request(transaction);
-    const fechaSolicitud = new Date();
+    const fechaActual = new Date();
 
-    // Obtener IdUsuario por cédula
-    const resultadoUsuario = await request
-      .input("cedula", sql.VarChar, cedula)
-      .query("SELECT IdUsuario FROM Clientes WHERE Cedula = @cedula");
+    // Obtener IdUsuario desde Clientes
+    const usuario = await pool.request()
+      .input('Cedula', cedula)
+      .query(`SELECT IdUsuario FROM Clientes WHERE Cedula = @Cedula`);
 
-    if (resultadoUsuario.recordset.length === 0) {
-      throw new Error("Cliente no encontrado con esa cédula");
+    if (!usuario.recordset.length) {
+      throw new Error("No se encontró un cliente con esa cédula");
     }
 
-    const idUsuario = resultadoUsuario.recordset[0].IdUsuario;
+    const idUsuario = usuario.recordset[0].IdUsuario;
 
-    // Insertar Cotización
-    const resultadoCotizacion = await request
-      .input("IdUsuario", sql.Int, idUsuario)
-      .input("FechaSolicitud", sql.DateTime, fechaSolicitud)
-      .input("Estado", sql.VarChar, "Pendiente")
+    // Calcular total de la cotización
+    let total = 0;
+    for (const producto of productos) {
+      total += producto.cantidad * producto.precioUnitario;
+    }
+
+    // Insertar cotización con Total
+    const result = await transaction.request()
+      .input('IdUsuario', idUsuario)
+      .input('Fecha', fechaActual)
+      .input('Total', total)
       .query(`
-        INSERT INTO Cotizaciones (IdUsuario, FechaSolicitud, Estado)
+        INSERT INTO Cotizaciones (IdUsuario, FechaSolicitud, Total)
         OUTPUT INSERTED.IdCotizacion
-        VALUES (@IdUsuario, @FechaSolicitud, @Estado)
+        VALUES (@IdUsuario, @Fecha, @Total)
       `);
 
-    const idCotizacion = resultadoCotizacion.recordset[0].IdCotizacion;
+    const idCotizacion = result.recordset[0].IdCotizacion;
 
-    // Insertar DetalleCotización
+    // Insertar detalle de cotización
     for (const producto of productos) {
-      await new sql.Request(transaction)
-        .input("IdCotizacion", sql.Int, idCotizacion)
-        .input("IdProducto", sql.Int, producto.idProducto)
-        .input("Cantidad", sql.Int, producto.cantidad)
-        .input("PrecioUnitario", sql.Int, producto.precioUnitario)
+      await transaction.request()
+        .input('IdCotizacion', idCotizacion)
+        .input('IdProducto', producto.idProducto)
+        .input('Cantidad', producto.cantidad)
+        .input('PrecioUnitario', producto.precioUnitario)
         .query(`
           INSERT INTO DetalleCotizacion (IdCotizacion, IdProducto, Cantidad, PrecioUnitario)
           VALUES (@IdCotizacion, @IdProducto, @Cantidad, @PrecioUnitario)
         `);
     }
 
+    // Insertar pedido (usa Cédula, no IdUsuario)
+    await transaction.request()
+      .input('Cedula', cedula)
+      .input('Fecha', fechaActual)
+      .query(`
+        INSERT INTO Pedidos (Cedula, FechaPedido)
+        VALUES (@Cedula, @Fecha)
+      `);
+
     await transaction.commit();
-    return { idCotizacion };
+    return { idCotizacion, mensaje: 'Cotización y pedido creados exitosamente' };
   } catch (error) {
     await transaction.rollback();
     throw error;
   }
 };
 
-const obtenerCotizacionesService = async (cedula) => {
+const obtenerCotizacionesPorCedula = async (cedula) => {
   const pool = await poolPromise;
 
-  const result = await pool.request()
-    .input("cedula", sql.VarChar, cedula)
-    .query(`
-      SELECT 
-        c.IdCotizacion,
-        c.FechaSolicitud,
-        c.Estado,
-        ISNULL(SUM(dc.PrecioUnitario * dc.Cantidad), 0) AS Total
-      FROM Cotizaciones c
-      INNER JOIN Clientes u ON c.IdUsuario = u.IdUsuario
-      LEFT JOIN DetalleCotizacion dc ON dc.IdCotizacion = c.IdCotizacion
-      WHERE u.Cedula = Cedula
-      GROUP BY c.IdCotizacion, c.FechaSolicitud, c.Estado
-      ORDER BY c.IdCotizacion DESC
-    `);
+  try {
+    const result = await pool.request()
+      .input('Cedula', cedula)
+      .query(`
+        SELECT c.IdCotizacion, c.FechaSolicitud, c.Total
+        FROM Cotizaciones c
+        JOIN Clientes cl ON c.IdUsuario = cl.IdUsuario
+        WHERE cl.Cedula = @Cedula
+        ORDER BY c.FechaSolicitud DESC
+      `);
 
-  return result.recordset;
+    const cotizaciones = [];
+
+    for (const cotizacion of result.recordset) {
+      const detalle = await pool.request()
+        .input('IdCotizacion', cotizacion.IdCotizacion)
+        .query(`
+          SELECT dc.IdProducto, p.Nombre AS NombreProducto, dc.Cantidad, dc.PrecioUnitario AS Precio
+          FROM DetalleCotizacion dc
+          INNER JOIN Productos p ON dc.IdProducto = p.IdProducto
+          WHERE dc.IdCotizacion = @IdCotizacion
+        `);
+
+      cotizaciones.push({
+        ...cotizacion,
+        Detalles: detalle.recordset
+      });
+    }
+
+    return cotizaciones;
+  } catch (error) {
+    throw error;
+  }
 };
 
 module.exports = {
-  crearCotizacionConDetalleService,
-  obtenerCotizacionesService
+  crearCotizacion,
+  obtenerCotizacionesPorCedula
 };
