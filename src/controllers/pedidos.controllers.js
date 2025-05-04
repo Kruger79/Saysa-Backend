@@ -1,37 +1,25 @@
-// src/controllers/pedidos.controllers.js
-const { guardarPedidoService, obtenerPedidosPorCedulaService } = require('../services/pedidos.service');
+const pedidosService = require('../services/pedidos.service');
 
-// POST: guardar pedido
-const guardarPedido = async (req, res) => {
-  const { cedula, productos } = req.body;
-
-  if (!cedula || !Array.isArray(productos)) {
-    return res.status(400).json({ error: 'Datos incompletos para guardar el pedido.' });
-  }
-
+const getPedidos = async (req, res) => {
   try {
-    await guardarPedidoService(cedula, productos);
-    res.status(201).json({ mensaje: 'Pedido guardado con éxito.' });
+    const pedidos = await pedidosService.obtenerTodosLosPedidos();
+    res.json(pedidos);
   } catch (error) {
-    console.error('❌ Error al guardar pedido:', error);
-    res.status(500).json({ error: 'Error al guardar el pedido.' });
+    res.status(500).json({ mensaje: 'Error al obtener pedidos', error });
   }
 };
 
-// GET: obtener pedidos por cédula
-const obtenerPedidosPorCedula = async (req, res) => {
-  const { cedula } = req.params;
-
+const getPedidosPorCedula = async (req, res) => {
   try {
-    const pedidos = await obtenerPedidosPorCedulaService(cedula);
+    const cedula = req.params.cedula;
+    const pedidos = await pedidosService.obtenerPedidosPorCedula(cedula);
     res.json(pedidos);
   } catch (error) {
-    console.error('❌ Error al obtener pedidos por cédula:', error);
-    res.status(500).json({ error: 'Error al obtener pedidos por cédula.' });
+    res.status(500).json({ mensaje: 'Error al obtener pedidos por cédula', error });
   }
 };
 
 module.exports = {
-  guardarPedido,
-  obtenerPedidosPorCedula,
+  getPedidos,
+  getPedidosPorCedula
 };
