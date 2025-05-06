@@ -58,13 +58,14 @@ const crearCotizacion = async (cedula, productos, nombreFinca, tiempoEntrega) =>
 
     // Insertar pedido y obtener IdPedido
     const pedidoResult = await transaction.request()
-      .input('Cedula', cedula)
-      .input('Fecha', fechaActual)
-      .query(`
-        INSERT INTO Pedidos (Cedula, FechaPedido)
-        OUTPUT INSERTED.IdPedido
-        VALUES (@Cedula, @Fecha)
-      `);
+    .input('Cedula', cedula)
+    .input('Fecha', fechaActual)
+    .input('IdCotizacion', idCotizacion)
+    .query(`
+      INSERT INTO Pedidos (Cedula, FechaPedido, IdCotizacion)
+      OUTPUT INSERTED.IdPedido
+      VALUES (@Cedula, @Fecha, @IdCotizacion)
+    `);
 
     const idPedido = pedidoResult.recordset[0].IdPedido;
 
@@ -126,7 +127,20 @@ const obtenerCotizacionesPorCedula = async (cedula) => {
   }
 };
 
+const actualizarEstadoCotizacion = async (idCotizacion, nuevoEstado) => {
+  const pool = await poolPromise;
+  await pool.request()
+    .input('Estado', nuevoEstado)
+    .input('IdCotizacion', idCotizacion)
+    .query(`
+      UPDATE Cotizaciones 
+      SET Estado = @Estado 
+      WHERE IdCotizacion = @IdCotizacion
+    `);
+};
+
 module.exports = {
   crearCotizacion,
-  obtenerCotizacionesPorCedula
+  obtenerCotizacionesPorCedula,
+  actualizarEstadoCotizacion
 };

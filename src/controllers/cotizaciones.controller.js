@@ -1,6 +1,7 @@
 const {
   crearCotizacion,
-  obtenerCotizacionesPorCedula
+  obtenerCotizacionesPorCedula,
+  actualizarEstadoCotizacion
 } = require('../services/cotizaciones.service');
 
 // Crear cotización (y guardar pedido automáticamente)
@@ -41,7 +42,24 @@ const obtenerCotizacionesPorCedulaHandler = async (req, res) => {
   }
 };
 
+// Cambiar estado de la cotización
+const actualizarEstadoCotizacionHandler = async (req, res) => {
+  try {
+    const idCotizacion = req.params.id;
+    const { estado } = req.body;
+
+    await actualizarEstadoCotizacion(idCotizacion, estado);
+
+    res.json({ mensaje: 'Estado actualizado correctamente' });
+  } catch (error) {
+    console.error('❌ Error al actualizar estado:', error);
+    res.status(500).json({ mensaje: 'Error al actualizar estado', error });
+  }
+};
+
+
 module.exports = {
   crearCotizacionHandler,
-  obtenerCotizacionesPorCedulaHandler
+  obtenerCotizacionesPorCedulaHandler,
+  actualizarEstadoCotizacionHandler
 };

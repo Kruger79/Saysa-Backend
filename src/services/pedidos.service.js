@@ -34,9 +34,12 @@ const obtenerTodosLosPedidos = async () => {
         p.IdPedido, 
         p.FechaPedido, 
         c.Nombre AS NombreCliente, 
-        c.Cedula
+        c.Cedula,
+        p.IdCotizacion,
+        co.Estado
       FROM Pedidos p
       INNER JOIN Clientes c ON p.Cedula = c.Cedula
+      LEFT JOIN Cotizaciones co ON co.IdCotizacion = p.IdCotizacion
       ORDER BY p.FechaPedido DESC
     `);
     return result.recordset;
@@ -44,6 +47,7 @@ const obtenerTodosLosPedidos = async () => {
     throw error;
   }
 };
+
 
 module.exports = {
   obtenerPedidosPorCedula,
