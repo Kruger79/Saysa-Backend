@@ -27,7 +27,9 @@ app.use('/api/v1/pedidos', pedidosRoutes);
 const cotizacionesRoutes = require('./v1/routes/cotizaciones.routes');
 app.use('/api/v1/cotizaciones', cotizacionesRoutes);
 
-// Ruta: 
+const configuracionRoutes = require('./v1/routes/configuracion.routes');
+app.use('/api/v1/configuracion', configuracionRoutes);
+
 
 
 

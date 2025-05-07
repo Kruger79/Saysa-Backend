@@ -1,6 +1,6 @@
 const { poolPromise } = require('../database/config');
 
-const crearCotizacion = async (cedula, productos, nombreFinca, tiempoEntrega) => {
+const crearCotizacion = async (cedula, productos, nombreFinca, tiempoEntrega, precioEnvio) => {
   const pool = await poolPromise;
   const transaction = pool.transaction();
 
@@ -10,8 +10,9 @@ const crearCotizacion = async (cedula, productos, nombreFinca, tiempoEntrega) =>
     const fechaActual = new Date();
 
     // Obtener IdUsuario desde Clientes
-    const usuario = await pool.request()
-      .input('Cedula', cedula)
+    const usuario = await pool
+      .request()
+      .input("Cedula", cedula)
       .query(`SELECT IdUsuario FROM Clientes WHERE Cedula = @Cedula`);
 
     if (!usuario.recordset.length) {
@@ -26,13 +27,15 @@ const crearCotizacion = async (cedula, productos, nombreFinca, tiempoEntrega) =>
       total += producto.cantidad * producto.precioUnitario;
     }
 
+    total += precioEnvio || 0; // ✅ Sumar el costo de envío al total
+
     // Insertar cotización con Total
-    const result = await transaction.request()
-      .input('IdUsuario', idUsuario)
-      .input('Fecha', fechaActual)
-      .input('Total', total)
-      .input('NombreFinca', nombreFinca || null)
-      .query(`
+    const result = await transaction
+      .request()
+      .input("IdUsuario", idUsuario)
+      .input("Fecha", fechaActual)
+      .input("Total", total)
+      .input("NombreFinca", nombreFinca || null).query(`
         INSERT INTO Cotizaciones (IdUsuario, FechaSolicitud, Total, NombreFinca)
         OUTPUT INSERTED.IdCotizacion
         VALUES (@IdUsuario, @Fecha, @Total, @NombreFinca)
@@ -48,8 +51,7 @@ const crearCotizacion = async (cedula, productos, nombreFinca, tiempoEntrega) =>
         .input("IdProducto", producto.idProducto)
         .input("Cantidad", producto.cantidad)
         .input("PrecioUnitario", producto.precioUnitario)
-        .input("TiempoEntrega", tiempoEntrega || null)
-        .query(`
+        .input("TiempoEntrega", tiempoEntrega || null).query(`
           INSERT INTO DetalleCotizacion 
           (IdCotizacion, IdProducto, Cantidad, PrecioUnitario, TiempoEntrega)
           VALUES (@IdCotizacion, @IdProducto, @Cantidad, @PrecioUnitario, @TiempoEntrega)
@@ -57,11 +59,11 @@ const crearCotizacion = async (cedula, productos, nombreFinca, tiempoEntrega) =>
     }
 
     // Insertar pedido y obtener IdPedido
-    const pedidoResult = await transaction.request()
-    .input('Cedula', cedula)
-    .input('Fecha', fechaActual)
-    .input('IdCotizacion', idCotizacion)
-    .query(`
+    const pedidoResult = await transaction
+      .request()
+      .input("Cedula", cedula)
+      .input("Fecha", fechaActual)
+      .input("IdCotizacion", idCotizacion).query(`
       INSERT INTO Pedidos (Cedula, FechaPedido, IdCotizacion)
       OUTPUT INSERTED.IdPedido
       VALUES (@Cedula, @Fecha, @IdCotizacion)
@@ -71,18 +73,21 @@ const crearCotizacion = async (cedula, productos, nombreFinca, tiempoEntrega) =>
 
     // Insertar detalle del pedido
     for (const producto of productos) {
-      await transaction.request()
-        .input('IdPedido', idPedido)
-        .input('IdProducto', producto.idProducto)
-        .input('Cantidad', producto.cantidad)
-        .query(`
+      await transaction
+        .request()
+        .input("IdPedido", idPedido)
+        .input("IdProducto", producto.idProducto)
+        .input("Cantidad", producto.cantidad).query(`
           INSERT INTO DetallePedido (IdPedido, IdProducto, Cantidad)
           VALUES (@IdPedido, @IdProducto, @Cantidad)
         `);
     }
 
     await transaction.commit();
-    return { idCotizacion, mensaje: 'Cotización, pedido y sus detalles creados exitosamente' };
+    return {
+      idCotizacion,
+      mensaje: "Cotización, pedido y sus detalles creados exitosamente",
+    };
   } catch (error) {
     await transaction.rollback();
     throw error;
