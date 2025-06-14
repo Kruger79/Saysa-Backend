@@ -31,10 +31,6 @@ const configuracionRoutes = require('./v1/routes/configuracion.routes');
 app.use('/api/v1/configuracion', configuracionRoutes);
 
 
-
-
-
-
 // ======================
 // INICIAR SERVIDOR
 // ======================

@@ -16,7 +16,9 @@ const config = {
 const poolPromise = new sql.ConnectionPool(config)
   .connect()
   .then(pool => {
-    console.log('🔗 Conectado a SQL Server');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔗 Conectado a SQL Server');
+    }
     return pool;
   })
   .catch(err => {

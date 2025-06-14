@@ -51,10 +51,10 @@ const crearCotizacion = async (cedula, productos, nombreFinca, tiempoEntrega, pr
         .input("IdProducto", producto.idProducto)
         .input("Cantidad", producto.cantidad)
         .input("PrecioUnitario", producto.precioUnitario)
-        .input("TiempoEntrega", tiempoEntrega || null).query(`
+        .query(`
           INSERT INTO DetalleCotizacion 
-          (IdCotizacion, IdProducto, Cantidad, PrecioUnitario, TiempoEntrega)
-          VALUES (@IdCotizacion, @IdProducto, @Cantidad, @PrecioUnitario, @TiempoEntrega)
+          (IdCotizacion, IdProducto, Cantidad, PrecioUnitario)
+          VALUES (@IdCotizacion, @IdProducto, @Cantidad, @PrecioUnitario)
         `);
     }
 
