@@ -10,5 +10,6 @@ const {
 router.post('/', crearCotizacionHandler);
 router.get('/:cedula', obtenerCotizacionesPorCedulaHandler);
 router.put('/:id', actualizarEstadoCotizacionHandler);
+router.put('/fecha-entrega', actualizarFechaEntregaHandler);
 
 module.exports = router;

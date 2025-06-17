@@ -1,6 +1,6 @@
 const { poolPromise } = require('../database/config');
 
-const crearCotizacion = async (cedula, productos, nombreFinca, tiempoEntrega, precioEnvio) => {
+const crearCotizacion = async (cedula, productos, nombreFinca, precioEnvio) => {
   const pool = await poolPromise;
   const transaction = pool.transaction();
 
@@ -141,6 +141,18 @@ const actualizarEstadoCotizacion = async (idCotizacion, nuevoEstado) => {
       UPDATE Cotizaciones 
       SET Estado = @Estado 
       WHERE IdCotizacion = @IdCotizacion
+    `);
+};
+
+const actualizarFechaEntrega = async (idDetalle, nuevaFecha) => {
+  const pool = await poolPromise;
+  await pool.request()
+    .input('IdDetalle', idDetalle)
+    .input('FechaEntrega', nuevaFecha)
+    .query(`
+      UPDATE DetalleCotizacion 
+      SET FechaEntrega = @FechaEntrega 
+      WHERE IdDetalle = @IdDetalle
     `);
 };
 

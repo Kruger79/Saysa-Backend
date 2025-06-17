@@ -57,6 +57,17 @@ const actualizarEstadoCotizacionHandler = async (req, res) => {
   }
 };
 
+const actualizarFechaEntregaHandler = async (req, res) => {
+  try {
+    const { idDetalle, fechaEntrega } = req.body;
+    await actualizarFechaEntrega(idDetalle, fechaEntrega);
+    res.json({ mensaje: 'Fecha de entrega actualizada correctamente' });
+  } catch (error) {
+    console.error("❌ Error al actualizar fecha de entrega:", error);
+    res.status(500).json({ mensaje: 'Error al actualizar fecha', error });
+  }
+};
+
 
 module.exports = {
   crearCotizacionHandler,
