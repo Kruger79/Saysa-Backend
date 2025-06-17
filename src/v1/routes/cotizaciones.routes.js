@@ -5,7 +5,6 @@ const {
   crearCotizacionHandler,
   obtenerCotizacionesPorCedulaHandler,
   actualizarEstadoCotizacionHandler,
-  actualizarFechaEntregaHandler,
   actualizarTiempoEntregaHandler
 } = require('../../controllers/cotizaciones.controller');
 
