@@ -8,13 +8,13 @@ const {
 // Crear cotización (y guardar pedido automáticamente)
 const crearCotizacionHandler = async (req, res) => {
   try {
-    const { cedula, productos, nombreFinca, tiempoEntrega, precioEnvio} = req.body;
+    const { cedula, productos, nombreFinca, precioEnvio} = req.body;
 
     if (!cedula || !productos || productos.length === 0) {
       return res.status(400).json({ mensaje: 'Datos incompletos para crear cotización' });
     }
 
-    const resultado = await crearCotizacion(cedula, productos, nombreFinca, tiempoEntrega, precioEnvio);
+    const resultado = await crearCotizacion(cedula, productos, nombreFinca, precioEnvio);
 
     res.status(201).json({
       mensaje: resultado.mensaje,
