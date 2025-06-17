@@ -27,7 +27,9 @@ const crearCotizacion = async (cedula, productos, nombreFinca, precioEnvio) => {
       total += producto.cantidad * producto.precioUnitario;
     }
 
-    total += precioEnvio || 0; // ✅ Sumar el costo de envío al total
+    total += Number(precioEnvio) || 0; // ✅ Sumar el costo de envío al total
+    console.log("🧾 Total sin envío:", total, "| Envío:", precioEnvio, "| Final:", total + Number(precioEnvio));
+
 
     // Insertar cotización con Total
     const result = await transaction
