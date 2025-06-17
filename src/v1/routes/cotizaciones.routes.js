@@ -8,8 +8,8 @@ const {
   actualizarFechaEntregaHandler
 } = require('../../controllers/cotizaciones.controller');
 
-router.post('/', crearCotizacionHandler);
 router.put('/fecha-entrega', actualizarFechaEntregaHandler);
+router.post('/', crearCotizacionHandler);
 router.get('/:cedula', obtenerCotizacionesPorCedulaHandler);
 router.put('/:id', actualizarEstadoCotizacionHandler);
 
