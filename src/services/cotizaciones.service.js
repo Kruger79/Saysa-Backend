@@ -144,15 +144,15 @@ const actualizarEstadoCotizacion = async (idCotizacion, nuevoEstado) => {
     `);
 };
 
-const actualizarFechaEntrega = async (idDetalle, nuevaFecha) => {
+const actualizarTiempoEntrega = async (idCotizacion, fechaEntrega) => {
   const pool = await poolPromise;
   await pool.request()
-    .input('IdDetalle', idDetalle)
-    .input('TiempoEntrega', nuevaFecha)
+    .input('IdCotizacion', idCotizacion)
+    .input('TiempoEntrega', fechaEntrega)
     .query(`
-      UPDATE DetalleCotizacion 
-      SET TiempoEntrega = @TiempoEntrega 
-      WHERE IdDetalle = @IdDetalle
+      UPDATE DetalleCotizacion
+      SET TiempoEntrega = @TiempoEntrega
+      WHERE IdCotizacion = @IdCotizacion
     `);
 };
 
@@ -160,5 +160,5 @@ module.exports = {
   crearCotizacion,
   obtenerCotizacionesPorCedula,
   actualizarEstadoCotizacion,
-  actualizarFechaEntrega
+  actualizarTiempoEntrega
 };

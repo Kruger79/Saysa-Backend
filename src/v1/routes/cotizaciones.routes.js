@@ -5,10 +5,11 @@ const {
   crearCotizacionHandler,
   obtenerCotizacionesPorCedulaHandler,
   actualizarEstadoCotizacionHandler,
-  actualizarFechaEntregaHandler
+  actualizarFechaEntregaHandler,
+  actualizarTiempoEntregaHandler
 } = require('../../controllers/cotizaciones.controller');
 
-router.put('/fecha-entrega', actualizarFechaEntregaHandler);
+router.put('/fecha-entrega', actualizarTiempoEntregaHandler);
 router.post('/', crearCotizacionHandler);
 router.get('/:cedula', obtenerCotizacionesPorCedulaHandler);
 router.put('/:id', actualizarEstadoCotizacionHandler);

@@ -58,14 +58,17 @@ const actualizarEstadoCotizacionHandler = async (req, res) => {
   }
 };
 
-const actualizarFechaEntregaHandler = async (req, res) => {
+const actualizarTiempoEntregaHandler = async (req, res) => {
   try {
-    const { idDetalle, fechaEntrega } = req.body;
-    await actualizarFechaEntrega(idDetalle, fechaEntrega);
-    res.json({ mensaje: 'Fecha de entrega actualizada correctamente' });
+    const { idCotizacion, fechaEntrega } = req.body;
+    if (!idCotizacion || !fechaEntrega) {
+      return res.status(400).json({ mensaje: 'Datos incompletos para actualizar tiempo de entrega' });
+    }
+    await actualizarTiempoEntrega(idCotizacion, fechaEntrega);
+    res.json({ mensaje: 'Tiempo de entrega actualizado correctamente' });
   } catch (error) {
-    console.error("❌ Error al actualizar fecha de entrega:", error);
-    res.status(500).json({ mensaje: 'Error al actualizar fecha', error });
+    console.error("❌ Error al actualizar tiempo de entrega:", error);
+    res.status(500).json({ mensaje: 'Error al actualizar tiempo de entrega', error });
   }
 };
 
@@ -74,5 +77,5 @@ module.exports = {
   crearCotizacionHandler,
   obtenerCotizacionesPorCedulaHandler,
   actualizarEstadoCotizacionHandler,
-  actualizarFechaEntregaHandler
+  actualizarTiempoEntregaHandler
 };
