@@ -59,11 +59,11 @@ const actualizarEstadoCotizacionHandler = async (req, res) => {
 
 const actualizarTiempoEntregaHandler = async (req, res) => {
   try {
-    const { idCotizacion, tiempoEntrega } = req.body;
-    if (!idCotizacion || !tiempoEntrega) {
+    const { idDetalle, tiempoEntrega } = req.body;
+    if (!idDetalle || !tiempoEntrega) {
       return res.status(400).json({ mensaje: 'Datos incompletos para actualizar tiempo de entrega' });
     }
-    await actualizarTiempoEntrega(idCotizacion, tiempoEntrega);
+    await actualizarTiempoEntrega(idDetalle, tiempoEntrega);
     res.json({ mensaje: 'Tiempo de entrega actualizado correctamente' });
   } catch (error) {
     console.error("❌ Error al actualizar tiempo de entrega:", error);

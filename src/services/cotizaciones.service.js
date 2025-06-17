@@ -144,15 +144,15 @@ const actualizarEstadoCotizacion = async (idCotizacion, nuevoEstado) => {
     `);
 };
 
-const actualizarTiempoEntrega = async (idCotizacion, tiempoEntrega) => {
+const actualizarTiempoEntrega = async (idDetalle, tiempoEntrega) => {
   const pool = await poolPromise;
   await pool.request()
-    .input('IdCotizacion', idCotizacion)
+    .input('IdDetalle', idDetalle)
     .input('TiempoEntrega', tiempoEntrega)
     .query(`
       UPDATE DetalleCotizacion
       SET TiempoEntrega = @TiempoEntrega
-      WHERE IdCotizacion = @IdCotizacion
+      WHERE IdDetalle = @IdDetalle
     `);
 };
 
