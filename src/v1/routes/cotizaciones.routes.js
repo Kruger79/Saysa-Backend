@@ -4,7 +4,8 @@ const router = express.Router();
 const {
   crearCotizacionHandler,
   obtenerCotizacionesPorCedulaHandler,
-  actualizarEstadoCotizacionHandler
+  actualizarEstadoCotizacionHandler,
+  actualizarFechaEntregaHandler
 } = require('../../controllers/cotizaciones.controller');
 
 router.post('/', crearCotizacionHandler);
