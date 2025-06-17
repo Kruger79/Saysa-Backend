@@ -1,7 +1,8 @@
 const {
   crearCotizacion,
   obtenerCotizacionesPorCedula,
-  actualizarEstadoCotizacion
+  actualizarEstadoCotizacion,
+  actualizarFechaEntrega
 } = require('../services/cotizaciones.service');
 
 // Crear cotización (y guardar pedido automáticamente)
