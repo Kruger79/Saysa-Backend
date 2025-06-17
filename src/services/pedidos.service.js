@@ -28,26 +28,28 @@ const obtenerTodosLosPedidos = async () => {
     const pool = await poolPromise;
     const result = await pool.query(`
       SELECT 
-        p.IdPedido, 
-        p.FechaPedido, 
-        c.Nombre AS NombreCliente, 
-        c.Cedula,
-        p.IdCotizacion,
-        co.Estado,
-        (
-          SELECT TOP 1 dc.TiempoEntrega
-          FROM DetalleCotizacion dc
-          WHERE dc.IdCotizacion = co.IdCotizacion AND dc.TiempoEntrega IS NOT NULL
-        ) AS TiempoEntrega,
-        (
-          SELECT TOP 1 dc.IdDetalle
-          FROM DetalleCotizacion dc
-          WHERE dc.IdCotizacion = co.IdCotizacion AND dc.TiempoEntrega IS NOT NULL
-        ) AS IdDetalle
-      FROM Pedidos p
-      INNER JOIN Clientes c ON p.Cedula = c.Cedula
-      LEFT JOIN Cotizaciones co ON co.IdCotizacion = p.IdCotizacion
-      ORDER BY p.FechaPedido DESC
+  p.IdPedido, 
+  p.FechaPedido, 
+  c.Nombre AS NombreCliente, 
+  c.Cedula,
+  p.IdCotizacion,
+  co.Estado,
+
+  dc.IdDetalle,
+  dc.TiempoEntrega
+
+FROM Pedidos p
+INNER JOIN Clientes c ON p.Cedula = c.Cedula
+LEFT JOIN Cotizaciones co ON co.IdCotizacion = p.IdCotizacion
+OUTER APPLY (
+  SELECT TOP 1 dc.IdDetalle, dc.TiempoEntrega
+  FROM DetalleCotizacion dc
+  WHERE dc.IdCotizacion = co.IdCotizacion
+  ORDER BY dc.IdDetalle ASC
+) dc
+
+ORDER BY p.FechaPedido DESC;
+
     `);
     return result.recordset;
   } catch (error) {
