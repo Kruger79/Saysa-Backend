@@ -114,7 +114,7 @@ const obtenerCotizacionesPorCedula = async (cedula) => {
       const detalle = await pool.request()
         .input('IdCotizacion', cotizacion.IdCotizacion)
         .query(`
-          SELECT dc.IdProducto, p.Nombre AS NombreProducto, dc.Cantidad, dc.PrecioUnitario AS Precio
+          SELECT dc.IdProducto, p.Nombre AS NombreProducto, dc.Cantidad, dc.PrecioUnitario AS Precio, dc.TiempoEntrega
           FROM DetalleCotizacion dc
           INNER JOIN Productos p ON dc.IdProducto = p.IdProducto
           WHERE dc.IdCotizacion = @IdCotizacion
@@ -131,6 +131,7 @@ const obtenerCotizacionesPorCedula = async (cedula) => {
     throw error;
   }
 };
+
 
 const actualizarEstadoCotizacion = async (idCotizacion, nuevoEstado) => {
   const pool = await poolPromise;
