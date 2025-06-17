@@ -1,12 +1,9 @@
-const { poolPromise } = require('../database/config');
+const { poolPromise } = require("../database/config");
 
 const obtenerPedidosPorCedula = async (cedula) => {
   try {
     const pool = await poolPromise;
-    const result = await pool
-      .request()
-      .input('Cedula', cedula)
-      .query(`
+    const result = await pool.request().input("Cedula", cedula).query(`
         SELECT 
           p.IdPedido, 
           p.FechaPedido, 
@@ -31,21 +28,26 @@ const obtenerTodosLosPedidos = async () => {
     const pool = await poolPromise;
     const result = await pool.query(`
       SELECT 
-    p.IdPedido, 
-    p.FechaPedido, 
-    c.Nombre AS NombreCliente, 
-    c.Cedula,
-    p.IdCotizacion,
-    co.Estado,
-    (
-      SELECT TOP 1 dc.TiempoEntrega
-      FROM DetalleCotizacion dc
-      WHERE dc.IdCotizacion = co.IdCotizacion AND dc.TiempoEntrega IS NOT NULL
-    ) AS TiempoEntrega
-  FROM Pedidos p
-  INNER JOIN Clientes c ON p.Cedula = c.Cedula
-  LEFT JOIN Cotizaciones co ON co.IdCotizacion = p.IdCotizacion
-  ORDER BY p.FechaPedido DESC
+        p.IdPedido, 
+        p.FechaPedido, 
+        c.Nombre AS NombreCliente, 
+        c.Cedula,
+        p.IdCotizacion,
+        co.Estado,
+        (
+          SELECT TOP 1 dc.TiempoEntrega
+          FROM DetalleCotizacion dc
+          WHERE dc.IdCotizacion = co.IdCotizacion AND dc.TiempoEntrega IS NOT NULL
+        ) AS TiempoEntrega,
+        (
+          SELECT TOP 1 dc.IdDetalle
+          FROM DetalleCotizacion dc
+          WHERE dc.IdCotizacion = co.IdCotizacion AND dc.TiempoEntrega IS NOT NULL
+        ) AS IdDetalle
+      FROM Pedidos p
+      INNER JOIN Clientes c ON p.Cedula = c.Cedula
+      LEFT JOIN Cotizaciones co ON co.IdCotizacion = p.IdCotizacion
+      ORDER BY p.FechaPedido DESC
     `);
     return result.recordset;
   } catch (error) {
@@ -53,8 +55,7 @@ const obtenerTodosLosPedidos = async () => {
   }
 };
 
-
 module.exports = {
   obtenerPedidosPorCedula,
-  obtenerTodosLosPedidos
+  obtenerTodosLosPedidos,
 };
