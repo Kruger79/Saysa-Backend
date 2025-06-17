@@ -72,5 +72,6 @@ const actualizarFechaEntregaHandler = async (req, res) => {
 module.exports = {
   crearCotizacionHandler,
   obtenerCotizacionesPorCedulaHandler,
-  actualizarEstadoCotizacionHandler
+  actualizarEstadoCotizacionHandler,
+  actualizarFechaEntregaHandler
 };

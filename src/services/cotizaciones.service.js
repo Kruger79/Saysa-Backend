@@ -159,5 +159,6 @@ const actualizarFechaEntrega = async (idDetalle, nuevaFecha) => {
 module.exports = {
   crearCotizacion,
   obtenerCotizacionesPorCedula,
-  actualizarEstadoCotizacion
+  actualizarEstadoCotizacion,
+  actualizarFechaEntrega
 };
