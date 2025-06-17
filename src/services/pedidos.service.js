@@ -36,7 +36,8 @@ const obtenerTodosLosPedidos = async () => {
         c.Nombre AS NombreCliente, 
         c.Cedula,
         p.IdCotizacion,
-        co.Estado
+        co.Estado,
+        (SELECT TOP 1 TiempoEntrega FROM DetalleCotizacion dc WHERE dc.IdCotizacion = co.IdCotizacion) AS TiempoEntrega
       FROM Pedidos p
       INNER JOIN Clientes c ON p.Cedula = c.Cedula
       LEFT JOIN Cotizaciones co ON co.IdCotizacion = p.IdCotizacion
