@@ -148,10 +148,10 @@ const actualizarFechaEntrega = async (idDetalle, nuevaFecha) => {
   const pool = await poolPromise;
   await pool.request()
     .input('IdDetalle', idDetalle)
-    .input('FechaEntrega', nuevaFecha)
+    .input('TiempoEntrega', nuevaFecha)
     .query(`
       UPDATE DetalleCotizacion 
-      SET FechaEntrega = @FechaEntrega 
+      SET TiempoEntrega = @TiempoEntrega 
       WHERE IdDetalle = @IdDetalle
     `);
 };
