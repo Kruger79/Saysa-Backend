@@ -9,8 +9,8 @@ const {
 } = require('../../controllers/cotizaciones.controller');
 
 router.post('/', crearCotizacionHandler);
+router.put('/fecha-entrega', actualizarFechaEntregaHandler);
 router.get('/:cedula', obtenerCotizacionesPorCedulaHandler);
 router.put('/:id', actualizarEstadoCotizacionHandler);
-router.put('/fecha-entrega', actualizarFechaEntregaHandler);
 
 module.exports = router;
