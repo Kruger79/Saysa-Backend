@@ -1,4 +1,4 @@
-const { poolPromise } = require('../database/config');
+const { poolPromise, sql } = require('../database/config');
 const {DateTime} = require("luxon")
 
 const crearCotizacion = async (cedula, productos, nombreFinca, precioEnvio) => {
@@ -8,7 +8,7 @@ const crearCotizacion = async (cedula, productos, nombreFinca, precioEnvio) => {
   try {
     await transaction.begin();
 
-    const fechaActual = DateTime.now().setZone("America/Costa_Rica").toJSDate();
+    const fechaActual = DateTime.now().setZone("America/Costa_Rica").toFormat("yyyy-MM-dd HH:mm:ss");
     console.log("Fecha en CR:", fechaActual);
 
     // Obtener IdUsuario desde Clientes
@@ -35,7 +35,7 @@ const crearCotizacion = async (cedula, productos, nombreFinca, precioEnvio) => {
     const result = await transaction
       .request()
       .input("IdUsuario", idUsuario)
-      .input("Fecha", fechaActual)
+      .input("Fecha", sql.DateTime, fechaActual)
       .input("Total", total)
       .input("NombreFinca", nombreFinca || null).query(`
         INSERT INTO Cotizaciones (IdUsuario, FechaSolicitud, Total, NombreFinca)
