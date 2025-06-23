@@ -1,4 +1,5 @@
 const { poolPromise } = require('../database/config');
+const {DateTime} = require("luxon")
 
 const crearCotizacion = async (cedula, productos, nombreFinca, precioEnvio) => {
   const pool = await poolPromise;
@@ -7,7 +8,8 @@ const crearCotizacion = async (cedula, productos, nombreFinca, precioEnvio) => {
   try {
     await transaction.begin();
 
-    const fechaActual = new Date();
+    const fechaActual = DateTime.now().setZone("America/Costa_Rica").toJSDate();
+    console.log("Fecha en CR:", fechaActual);
 
     // Obtener IdUsuario desde Clientes
     const usuario = await pool
