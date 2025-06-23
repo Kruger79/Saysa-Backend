@@ -8,7 +8,7 @@ const crearCotizacion = async (cedula, productos, nombreFinca, precioEnvio) => {
   try {
     await transaction.begin();
 
-    const fechaActual = DateTime.now().setZone("America/Costa_Rica").toFormat("yyyy-MM-dd HH:mm:ss");
+    const fechaActual = DateTime.now().setZone("America/Costa_Rica").toJSDate();
     console.log("Fecha en CR:", fechaActual);
 
     // Obtener IdUsuario desde Clientes
